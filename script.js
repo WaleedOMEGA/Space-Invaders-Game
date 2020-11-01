@@ -65,12 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
         resultDisplay.textContent = 'Game Over';
         squares[currentShooterIndex].classList.add('boom');
         clearInterval(invaderId);
+        endGame();
+
     }
 
     for (let i = 0; i <= alienInvaders.length - 1; i++){
       if(alienInvaders[i] > (squares.length - (width -1))){
           resultDisplay.textContent = 'Game Over';
           clearInterval(invaderId);
+          endGame();
       }
     }
 
@@ -80,8 +83,52 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(alienInvaders.length);
         resultDisplay.textContent = 'You Win';
         clearInterval(invaderId);
+        endGame();
     }
     }
     
-    invaderId = setInterval(moveInvaders, 500)
+    invaderId = setInterval(moveInvaders, 500);
+
+    //shoot at aliens
+  const shoot=(e)=> {
+      let laserId;
+      let currentLaserIndex = currentShooterIndex;
+    //move the laser from the shooter to the alien invader
+    const moveLaser=()=> {
+        squares[currentLaserIndex].classList.remove('laser');
+        currentLaserIndex -= width;
+        squares[currentLaserIndex].classList.add('laser');
+      if(squares[currentLaserIndex].classList.contains('invader')) {
+          squares[currentLaserIndex].classList.remove('laser');
+          squares[currentLaserIndex].classList.remove('invader');
+          squares[currentLaserIndex].classList.add('boom');
+
+          setTimeout(() => squares[currentLaserIndex].classList.remove('boom'), 250);
+          clearInterval(laserId);
+
+          const alienTakenDown = alienInvaders.indexOf(currentLaserIndex);
+          alienInvadersTakenDown.push(alienTakenDown);
+          result++;
+          resultDisplay.textContent = result;
+      }
+
+      if(currentLaserIndex < width) {
+          clearInterval(laserId);
+          setTimeout(() => squares[currentLaserIndex].classList.remove('laser'), 100);
+      }
+    }
+
+    switch(e.keyCode) {
+        case 32:
+            laserId = setInterval(moveLaser, 100);
+            break;
+    }
+    }
+
+    document.addEventListener('keyup', shoot);
+
+    const endGame = () => {
+        document.removeEventListener('keyup', shoot);
+        document.removeEventListener('keydown', moveShooter);
+    }
 });
